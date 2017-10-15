@@ -58,23 +58,12 @@ describe('GistClient', () => {
     })
 
     describe('#getAll(filterBy, sinceDate)', () => {
-        it('Should throw an error if filterBy has more than two filters', () => {
-            try {
-                const gistClient = new GistClient()
-                gistClient.getAll([{starred: true}, {public: true}, {since: '2017-07-01T00:00:00Z'}])
-                    .then(response => {})
-            } catch (err) {
-                expect(err).to.equal("Only two filters allowed at same time")
-            }
-        })
-
-        it('Should throw an error if you try to combine two filters without since', () => {
-            try {
-                const gistClient = new GistClient()
-                gistClient.getAll([{starred: true}, {public: true}]).then(response => {})
-            } catch (err) {
-                expect(err).to.equal("You only can combine filters with 'since' filter")
-            }
+        it('Should throw an error if filterBy contains a combination of: userName, starred, public', () => {
+            const gistClient = new GistClient()
+            return gistClient.getAll([{starred: true}, {public: true}, {since: '2017-07-01T00:00:00Z'}])
+                .catch((err) => {
+                    return expect(err).to.equal("You cannot combine this filters: userName, starred, public")
+                })
         })
 
         it('Should return all user\'s gists without token in a pagination behaviour', () => {
