@@ -33,7 +33,7 @@ describe('GistClient', () => {
             try {
                 gistClient.getOneById('123456')
             } catch (err) {
-                expect(err).to.equal("You need to set token before by setToken() method")
+                expect(err.message).to.equal("You need to set token before by setToken() method")
             }
         })
 
@@ -57,13 +57,43 @@ describe('GistClient', () => {
         })
     })
 
+    describe('#getRevision(gistId)', () => {
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.getRevision('aa5a315d61ae9438b18d')
+            } catch (err) {
+                expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should make a request to Gist API and get a single result', () => {
+            const SHA = 'aa5a315d61ae9438b18d'
+            const ID = '82773a5192a665b659b9afe3e2375e96'
+            const URL = 'https://api.github.com/gists/' + ID + '/' + SHA
+            nock('https://api.github.com')
+                .get('/gists/' + ID + '/' + SHA)
+                .reply(200, {
+                    url: URL,
+                    id: ID
+                });
+            const gistClient = new GistClient()
+            gistClient.setToken('MyToken').getRevision(ID, SHA).then((result) => {
+                expect(result.data.url).to.equal(URL)
+                expect(result.data.id).to.equal(ID)
+            })
+        })
+    })
+
     describe('#getAll(filterBy, sinceDate)', () => {
         it('Should throw an error if filterBy contains a combination of: userName, starred, public', () => {
             const gistClient = new GistClient()
-            return gistClient.getAll([{starred: true}, {public: true}, {since: '2017-07-01T00:00:00Z'}])
-                .catch((err) => {
-                    return expect(err).to.equal("You cannot combine this filters: userName, starred, public")
-                })
+            try {
+                gistClient.getAll([{starred: true}, {public: true}, {since: '2017-07-01T00:00:00Z'}])
+            }
+            catch(err) {
+                return expect(err.message).to.equal("You cannot combine this filters: userName, starred, public")
+            }
         })
 
         it('Should return all user\'s gists without token in a pagination behaviour', () => {
@@ -129,6 +159,79 @@ describe('GistClient', () => {
                 gistClient.setToken('token')
                     .getAll([{since: '2017-07-01T00:00:00Z'}])).to.eventually.deep.equal([{id: 333}]
             )
+        })
+    })
+
+    describe('#isStarred(gistId)', () => {
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.isStarred('11111')
+            } catch (err) {
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should make a request to Gist API and return true if gist is starred', () => {
+            nock('https://api.github.com')
+                .get('/gists/1/star')
+                .reply(204, null);
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').isStarred('1')).to.eventually.deep.equal(true)
+        })
+
+        it('Should make a request to Gist API and return false if gist is not starred', () => {
+            nock('https://api.github.com')
+                .get('/gists/2/star')
+                .reply(404, null);
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').isStarred('2')).to.eventually.deep.equal(false)
+        })
+
+        it('Should throw an error if response status code is not 204 or 404', () => {
+            nock('https://api.github.com')
+                .get('/gists/2/star')
+                .reply(500, null);
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').isStarred('2')).to.eventually.be.rejectedWith(Error)
+        })
+    })
+
+    describe('#star(gistId)', () => {
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.star('11111')
+            } catch (err) {
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should make a request to Gist API to mark gist as starred', () => {
+            nock('https://api.github.com')
+                .put('/gists/1/star')
+                .reply(204, null);
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').star('1')).to.eventually.deep.equal(true)
+        })
+    })
+
+    describe('#unstar(gistId)', () => {
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.unstar('11111')
+            } catch (err) {
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should make a request to Gist API to mark gist as unstarred', () => {
+            nock('https://api.github.com')
+                .delete('/gists/1/star')
+                .reply(204, null);
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').unstar('1')).to.eventually.deep.equal(true)
         })
     })
 
