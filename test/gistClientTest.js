@@ -235,4 +235,50 @@ describe('GistClient', () => {
         })
     })
 
+    describe('#getCommits(gistId, filterBy)', () => {
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.getCommits('aa5a315d61ae9438b18d')
+            } catch (err) {
+                expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should return all gist\'s commits', () => {
+            const result = [{"version": '1'}, {"version": '2'}, {"version": '3'}]
+            nock('https://api.github.com')
+                .get('/gists/1/commits')
+                .query({'per_page': 100})
+                .reply(200, result, {
+                    'Link': '<https://api.github.com/gists/1/commits?per_page=100&page=1>; rel="first", <https://api.github.com/gists/1/commits?per_page=100&page=1>; rel="last"'
+                })
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').getCommits('1')).to.eventually.deep.equal(result)
+        })
+    })
+
+    describe('#getForks(gistId, filterBy)', () => {
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.getForks('aa5a315d61ae9438b18d')
+            } catch (err) {
+                expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should return all gist\'s forks', () => {
+            const result = [{"id": '1'}, {"id": '2'}, {"id": '3'}]
+            nock('https://api.github.com')
+                .get('/gists/1/forks')
+                .query({'per_page': 100})
+                .reply(200, result, {
+                    'Link': '<https://api.github.com/gists/1/forks?per_page=100&page=1>; rel="first", <https://api.github.com/gists/1/forks?per_page=100&page=1>; rel="last"'
+                })
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').getForks('1')).to.eventually.deep.equal(result)
+        })
+    })
+
 })
