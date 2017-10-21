@@ -23,7 +23,7 @@ describe('GistClient', () => {
             const gistClient = new GistClient()
             gistClient.setToken('MyToken')
             gistClient.unsetToken()
-            expect(gistClient.token).to.be.a('null')
+            return expect(gistClient.token).to.be.a('null')
         })
     })
 
@@ -33,7 +33,7 @@ describe('GistClient', () => {
             try {
                 gistClient.getOneById('123456')
             } catch (err) {
-                expect(err.message).to.equal("You need to set token before by setToken() method")
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
             }
         })
 
@@ -63,7 +63,7 @@ describe('GistClient', () => {
             try {
                 gistClient.getRevision('aa5a315d61ae9438b18d')
             } catch (err) {
-                expect(err.message).to.equal("You need to set token before by setToken() method")
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
             }
         })
 
@@ -160,6 +160,51 @@ describe('GistClient', () => {
                     .getAll([{since: '2017-07-01T00:00:00Z'}])).to.eventually.deep.equal([{id: 333}]
             )
         })
+
+        it('Should return gist filtered by some fields', () => {
+            const getMockRow = (gistId, description, language) => {
+                return  {
+                    "url": "https://api.github.com/gists/" + gistId,
+                    "id": gistId,
+                    "description": description,
+                    "public": true,
+                    "owner": {
+                        "id": 1,
+                    },
+                    "user": null,
+                    "files": {
+                        "ring.erl": {
+                            "size": 932,
+                            "raw_url": "https://gist.githubusercontent.com/raw/365370/1/ring.erl",
+                            "type": "text/plain",
+                            "truncated": false,
+                            "language": language,
+                            "content": description
+                        }
+                    }
+                }
+            }
+            const gistList = [
+                getMockRow(1, 'Description for Javascript', 'Javascript'),
+                getMockRow(2, 'Description for Java', 'Java'),
+                getMockRow(3, 'Description for Java', 'Erlang'),
+                getMockRow(4, 'Description for PHP', 'PHP')
+            ]
+
+            nock('https://api.github.com')
+                .get('/gists/public')
+                .query({'per_page': 100})
+                .reply(200, gistList, {
+                    'Link': '<https://api.github.com/gists/public?per_page=100&page=1>; rel="first", <https://api.github.com/gists/public?per_page=100&page=1>; rel="last"'
+                })
+
+            const filterBy = [{"content": "Java"}, {"language": "Java"}, {"public": true}]
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').getAll(filterBy)).to.eventually.deep.equal([
+                getMockRow(1, 'Description for Javascript', 'Javascript'),
+                getMockRow(2, 'Description for Java', 'Java')
+            ])
+        })
     })
 
     describe('#isStarred(gistId)', () => {
@@ -241,7 +286,7 @@ describe('GistClient', () => {
             try {
                 gistClient.getCommits('aa5a315d61ae9438b18d')
             } catch (err) {
-                expect(err.message).to.equal("You need to set token before by setToken() method")
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
             }
         })
 
@@ -264,7 +309,7 @@ describe('GistClient', () => {
             try {
                 gistClient.getForks('aa5a315d61ae9438b18d')
             } catch (err) {
-                expect(err.message).to.equal("You need to set token before by setToken() method")
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
             }
         })
 
@@ -278,6 +323,91 @@ describe('GistClient', () => {
                 })
             const gistClient = new GistClient()
             return expect(gistClient.setToken('MyToken').getForks('1')).to.eventually.deep.equal(result)
+        })
+    })
+
+    describe('#create(data)', () => {
+        const gist = {
+            "files": [{
+                "x.txt": {
+                    "content": "xx"
+                }
+            }],
+            "description": "desc",
+            "public": true
+        }
+
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.create(gist)
+            } catch (err) {
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should make a post to create a gist and returns its content', () => {
+            nock('https://api.github.com')
+                .post('/gists', gist)
+                .reply(201, gist)
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken')
+                .create(gist)).to.eventually.deep.equal({
+                data: gist,
+                headers: {"content-type": "application/json"}
+            })
+        })
+    })
+
+    describe('#update(data)', () => {
+        const gist = {
+            "files": [{
+                "x.txt": {
+                    "content": "xx"
+                }
+            }],
+            "description": "desc",
+            "public": true
+        }
+
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.update(1, gist)
+            } catch (err) {
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should make a patch to update a gist and returns its content', () => {
+            nock('https://api.github.com')
+                .patch('/gists/1', gist)
+                .reply(200, gist)
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken')
+                .update(1, gist)).to.eventually.deep.equal({
+                data: gist,
+                headers: {"content-type": "application/json"}
+            })
+        })
+    })
+
+    describe('#delete(data)', () => {
+        it('Should throw an error if token is not set', () => {
+            const gistClient = new GistClient()
+            try {
+                gistClient.delete(1)
+            } catch (err) {
+                return expect(err.message).to.equal("You need to set token before by setToken() method")
+            }
+        })
+
+        it('Should make a request to Gist API to delete a gist', () => {
+            nock('https://api.github.com')
+                .delete('/gists/1')
+                .reply(204, null);
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('MyToken').delete('1')).to.eventually.deep.equal(true)
         })
     })
 
