@@ -162,8 +162,8 @@ describe('GistClient', () => {
         })
 
         it('Should return gist filtered by some fields', () => {
-            const getMockRow = (gistId, description, language) => {
-                return  {
+            const getMockRow = (gistId, description, language, content = null) => {
+                const mock = {
                     "url": "https://api.github.com/gists/" + gistId,
                     "id": gistId,
                     "description": description,
@@ -175,14 +175,17 @@ describe('GistClient', () => {
                     "files": {
                         "ring.erl": {
                             "size": 932,
-                            "raw_url": "https://gist.githubusercontent.com/raw/365370/1/ring.erl",
+                            "raw_url": "https://gist.githubusercontent.com/raw/" + gistId,
                             "type": "text/plain",
                             "truncated": false,
-                            "language": language,
-                            "content": description
+                            "language": language
                         }
                     }
                 }
+                if (content) {
+                    mock.files['ring.erl']['content'] = content
+                }
+                return mock
             }
             const gistList = [
                 getMockRow(1, 'Description for Javascript', 'Javascript'),
@@ -197,12 +200,16 @@ describe('GistClient', () => {
                 .reply(200, gistList, {
                     'Link': '<https://api.github.com/gists/public?per_page=100&page=1>; rel="first", <https://api.github.com/gists/public?per_page=100&page=1>; rel="last"'
                 })
+            nock('https://gist.githubusercontent.com').get('/raw/1').reply(200, "Javascript")
+            nock('https://gist.githubusercontent.com').get('/raw/2').reply(200, "Java")
+            nock('https://gist.githubusercontent.com').get('/raw/3').reply(200, "Erlang")
+            nock('https://gist.githubusercontent.com').get('/raw/4').reply(200, "PHP")
 
             const filterBy = [{"content": "Java"}, {"language": "Java"}, {"public": true}]
             const gistClient = new GistClient()
             return expect(gistClient.setToken('MyToken').getAll(filterBy)).to.eventually.deep.equal([
-                getMockRow(1, 'Description for Javascript', 'Javascript'),
-                getMockRow(2, 'Description for Java', 'Java')
+                getMockRow(1, 'Description for Javascript', 'Javascript', 'Javascript'),
+                getMockRow(2, 'Description for Java', 'Java', 'Java')
             ])
         })
     })
