@@ -50,9 +50,9 @@ describe('GistClient', () => {
                 });
             const gistClient = new GistClient()
             gistClient.setToken('MyToken').getOneById(ID).then((result) => {
-                expect(result.data.url).to.equal(URL)
-                expect(result.data.id).to.equal(ID)
-                expect(result.data.description).to.equal(DESCRIPTION)
+                expect(result.url).to.equal(URL)
+                expect(result.id).to.equal(ID)
+                expect(result.description).to.equal(DESCRIPTION)
             })
         })
     })
@@ -79,8 +79,8 @@ describe('GistClient', () => {
                 });
             const gistClient = new GistClient()
             gistClient.setToken('MyToken').getRevision(ID, SHA).then((result) => {
-                expect(result.data.url).to.equal(URL)
-                expect(result.data.id).to.equal(ID)
+                expect(result.url).to.equal(URL)
+                expect(result.id).to.equal(ID)
             })
         })
     })
@@ -363,10 +363,7 @@ describe('GistClient', () => {
                 .reply(201, gist)
             const gistClient = new GistClient()
             return expect(gistClient.setToken('MyToken')
-                .create(gist)).to.eventually.deep.equal({
-                data: gist,
-                headers: {"content-type": "application/json"}
-            })
+                .create(gist)).to.eventually.deep.equal(gist)
         })
     })
 
@@ -396,10 +393,7 @@ describe('GistClient', () => {
                 .reply(200, gist)
             const gistClient = new GistClient()
             return expect(gistClient.setToken('MyToken')
-                .update(1, gist)).to.eventually.deep.equal({
-                data: gist,
-                headers: {"content-type": "application/json"}
-            })
+                .update(1, gist)).to.eventually.deep.equal(gist)
         })
     })
 
