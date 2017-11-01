@@ -89,7 +89,7 @@ describe('GistClient', () => {
         it('Should throw an error if filterBy contains a combination of: userName, starred, public', () => {
             const gistClient = new GistClient()
             try {
-                gistClient.getAll([{starred: true}, {public: true}, {since: '2017-07-01T00:00:00Z'}])
+                gistClient.getAll({filterBy: [{starred: true}, {public: true}, {since: '2017-07-01T00:00:00Z'}]})
             }
             catch(err) {
                 return expect(err.message).to.equal("You cannot combine this filters: userName, starred, public")
@@ -122,7 +122,8 @@ describe('GistClient', () => {
             const merged_results = result1.concat(result2).concat(result3)
 
             const gistClient = new GistClient()
-            return expect(gistClient.getAll([{userName: USERNAME}])).to.eventually.deep.equal(merged_results)
+            return expect(gistClient.getAll({filterBy: [{userName: USERNAME}]}))
+                .to.eventually.deep.equal(merged_results)
         })
 
         it('Should return starred gists', () => {
@@ -133,7 +134,8 @@ describe('GistClient', () => {
                     'Link': '<https://api.github.com/gists/starred?per_page=100&page=1>; rel="first", <https://api.github.com/gists/starred?per_page=100&page=1>; rel="last"'
                 })
             const gistClient = new GistClient()
-            return expect(gistClient.setToken('token').getAll([{starred: true}])).to.eventually.deep.equal([{id: 111}])
+            return expect(gistClient.setToken('token').getAll({filterBy: [{starred: true}]}))
+                .to.eventually.deep.equal([{id: 111}])
         })
 
         it('Should return public gists', () => {
@@ -144,7 +146,8 @@ describe('GistClient', () => {
                     'Link': '<https://api.github.com/gists/public?per_page=100&page=1>; rel="first", <https://api.github.com/gists/public?per_page=100&page=1>; rel="last"'
                 })
             const gistClient = new GistClient()
-            return expect(gistClient.setToken('token').getAll([{public: true}])).to.eventually.deep.equal([{id: 222}])
+            return expect(gistClient.setToken('token').getAll({filterBy: [{public: true}]}))
+                .to.eventually.deep.equal([{id: 222}])
         })
 
         it('Should return gists filtered by since date', () => {
@@ -157,7 +160,7 @@ describe('GistClient', () => {
             const gistClient = new GistClient()
             return expect(
                 gistClient.setToken('token')
-                    .getAll([{since: '2017-07-01T00:00:00Z'}])).to.eventually.deep.equal([{id: 333}]
+                    .getAll({filterBy: [{since: '2017-07-01T00:00:00Z'}]})).to.eventually.deep.equal([{id: 333}]
             )
         })
 
@@ -207,10 +210,11 @@ describe('GistClient', () => {
 
             const filterBy = [{"content": "Java"}, {"language": "Java"}, {"public": true}]
             const gistClient = new GistClient()
-            return expect(gistClient.setToken('MyToken').getAll(filterBy)).to.eventually.deep.equal([
-                getMockRow(1, 'Description for Javascript', 'Javascript', 'Javascript'),
-                getMockRow(2, 'Description for Java', 'Java', 'Java')
-            ])
+            return expect(gistClient.setToken('MyToken').getAll({"filterBy": filterBy, "rawContent": true}))
+                .to.eventually.deep.equal([
+                    getMockRow(1, 'Description for Javascript', 'Javascript', 'Javascript'),
+                    getMockRow(2, 'Description for Java', 'Java', 'Java')
+                ])
         })
     })
 
