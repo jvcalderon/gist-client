@@ -1,6 +1,6 @@
 {
   "name": "gist-client",
-  "description": "A client to consume Gist API by JS",
+  "description": "A client to consume Gist API with JS",
   "version": "0.0.0",
   "author": "José Vte. Calderón <jvcprod@hotmail.com>",
   "scripts": {
