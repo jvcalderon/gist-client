@@ -1,7 +1,7 @@
 Gist Client
 ==============
 
-A client to consume [Gist](https://gist.github.com/) API with JS. Provides some features like filtering or abstraction of resource pagination. You don know Gist? See [official Github's help](https://help.github.com/articles/about-gists/).
+A client to consume [Gist](https://gist.github.com/) API with JS. Provides some features like filtering or abstraction of resource pagination. You don't know Gist? See [official Github's help](https://help.github.com/articles/about-gists/).
 
 ## Installation
 
@@ -34,7 +34,7 @@ Gist Client works with promises. For example, if you want to get a single Gist y
         console.log(err)
     })</code></pre>
     
-You don need a token to get a public Gist, but if you are trying to get a private one, you need to set the token. You can do:
+You don't need a token to get a public Gist, but if you are trying to get a private one, you need to set the token. You can do:
 
 <pre><code>gistClient.setToken('YOUR_TOKEN').getOneById('GIST_ID')</code></pre>
 
