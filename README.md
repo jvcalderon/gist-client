@@ -5,6 +5,7 @@ Gist Client
 
 [![Build Status](https://travis-ci.org/jvcalderon/gist-client.svg?branch=master)](https://travis-ci.org/jvcalderon/gist-client)
 [![Coverage Status](https://coveralls.io/repos/github/jvcalderon/gist-client/badge.svg?branch=master)](https://coveralls.io/github/jvcalderon/gist-client?branch=master)
+[![Known Vulnerabilities](https://snyk.io/test/github/jvcalderon/gist-client/badge.svg)](https://snyk.io/test/github/jvcalderon/gist-client)
 
 A client to consume [Gist](https://gist.github.com/) API with JS. Provides some features like filtering or abstraction of resource pagination. You don't know Gist? See [official Github's help](https://help.github.com/articles/about-gists/).
 
