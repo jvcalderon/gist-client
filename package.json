@@ -1,7 +1,7 @@
 {
   "name": "gist-client",
   "description": "A client to consume Gist API with JS",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "author": "José Vte. Calderón <jvcprod@hotmail.com>",
   "scripts": {
     "test": "nyc mocha",
