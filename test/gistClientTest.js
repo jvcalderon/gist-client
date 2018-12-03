@@ -216,6 +216,19 @@ describe('GistClient', () => {
                     getMockRow(2, 'Description for Java', 'Java', 'Java')
                 ])
         })
+
+        it('Doesn`t need token to get content', () => {
+            nock('https://api.github.com')
+                .get('/gists')
+                .query({'per_page': 100, 'since': '2017-07-01T00:00:00Z'})
+                .reply(200, [{id: 333}], {
+                    'Link': '<https://api.github.com/gists/public?per_page=100&since=2017-07-01T00:00:00Z&page=1>; rel="first", <https://api.github.com/gists/public?per_page=100&since=2017-07-01T00:00:00Z&page=1>; rel="last"'
+                })
+            const gistClient = new GistClient()
+            return expect(
+                gistClient.getAll({filterBy: [{since: '2017-07-01T00:00:00Z'}]})).to.eventually.deep.equal([{id: 333}]
+            )
+        })
     })
 
     describe('#isStarred(gistId)', () => {
