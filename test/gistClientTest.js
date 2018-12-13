@@ -164,6 +164,21 @@ describe('GistClient', () => {
             )
         })
 
+        it('Should return gists filtered by filename', () => {
+            nock('https://api.github.com')
+                .get('/gists')
+                .query({'per_page': 100})
+                .reply(200, [
+                    {"id": 1, "files": {"x.json" : {}}},
+                    {"id": 2, "files": {"y.json" : {"filename": "y.json"}}}
+                ], {
+                    'Link': '<https://api.github.com/gists/public?per_page=100&page=1>; rel="first", <https://api.github.com/gists/public?per_page=100&page=1>; rel="last"'
+                })
+            const gistClient = new GistClient()
+            return expect(gistClient.setToken('token').getAll({filterBy: [{filename: "y.json"}]}))
+                .to.eventually.deep.equal([{"id": 2, "files": {"y.json" : {"filename": "y.json"}}}])
+        })
+
         it('Should return gist filtered by some fields', () => {
             const getMockRow = (gistId, description, language, content = null) => {
                 const mock = {

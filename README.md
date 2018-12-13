@@ -86,6 +86,7 @@ There is a limited list of filters that can be applied to a result:
 | userName | resource | string | Name of the user whose documents you want to list. |
 | starred | resource | bool | Starred gists. |
 | public | resource | bool | Public gists. |
+| filename | file | string | Complete file name, f.ex: doc.json, index.sh... **It doesn`t filter files inside a gist. It just filter all gists that contains a file with given name**.|
 | size | file | int | File size in Kb. |
 | raw_url | file | string | Url to file's raw content. |
 | type | file | string | text/plain, application/json... |
