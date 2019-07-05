@@ -5,7 +5,9 @@
   "author": "José Vte. Calderón <jvcprod@hotmail.com>",
   "scripts": {
     "test": "nyc mocha",
-    "coverall": "nyc report --reporter=text-lcov | coveralls"
+    "coverall": "nyc report --reporter=text-lcov | coveralls",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "repository": {
     "type": "git",
@@ -30,6 +32,8 @@
     "co": "^4.6.0",
     "lodash": "^4.17.4",
     "request": "^2.83.0",
-    "request-promise-native": "^1.0.5"
-  }
+    "request-promise-native": "^1.0.5",
+    "snyk": "^1.190.0"
+  },
+  "snyk": true
 }
